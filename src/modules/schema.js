@@ -15,9 +15,8 @@ const userProfile = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-
     },
-    profile_pic: {
-        type: image,
-    }
 })
+
+const usermodule = mongoose.model("users", userProfile);
+module.exports = usermodule;
