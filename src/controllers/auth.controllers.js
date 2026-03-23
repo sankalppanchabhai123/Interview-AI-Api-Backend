@@ -1,6 +1,7 @@
-const { jwt } = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const userModel = require("../modules/schema");
-const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs")
+// const cookieParser = require("cookie-parser");
 
 /**
  * @route POST /api/auth/register
@@ -8,21 +9,21 @@ const cookieParser = require("cookie-parser");
  * @access Public 
  */
 async function registerUserController(req, res) {
-    const { username, email, password } = req.body;
+    const { username, email, password } = req.body || {};
     if (!username || !email || !password) {
         return res.status(400).json({
             "massage": "please provide username, email and password"
         })
     }
 
-    const isUserAlreadyExists = await userModel.find({
-        $or: ("username", "email")
+    const isUserAlreadyExists = await userModel.findOne({
+        $or: [{ username }, { email }]
     })
     if (isUserAlreadyExists) {
         return res.status(400).json({ "massage": "username/email already taken" })
     }
 
-    const hashedPassword = await bcrypt.hash("password", password);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const User = await userModel.create({
         username,
@@ -48,7 +49,7 @@ async function registerUserController(req, res) {
 }
 
 async function loginUserController(req, res) {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     const User = await userModel.findOne({ email })
     if (!User) {
@@ -58,7 +59,7 @@ async function loginUserController(req, res) {
     }
 
     const getUserData = await bcrypt.compare(password, User.password);
-    if (getUserData) {
+    if (!getUserData) {
         return res.status(400).json({ "message": "incorrect password" })
     }
 
