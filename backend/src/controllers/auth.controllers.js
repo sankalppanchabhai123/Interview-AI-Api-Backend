@@ -95,8 +95,34 @@ async function logoutUserController(req, res) {
     })
 }
 
+async function getMeController(req, res) {
+    const userId = req.user?._id || req.user?.id;
+
+    if (!userId) {
+        return res.status(401).json({
+            message: "Unauthorized"
+        })
+    }
+
+    const user = await userModel.findById(userId)
+
+    if (!user) {
+        return res.status(404).json({
+            message: "User not found"
+        })
+    }
+
+    res.status(200).json({
+        user: {
+            id: user._id,
+            email: user.email,
+            username: user.username,
+        }
+    })
+}
 module.exports = {
     registerUserController,
     loginUserController,
     logoutUserController,
+    getMeController,
 }

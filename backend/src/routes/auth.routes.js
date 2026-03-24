@@ -1,5 +1,6 @@
 const express = require('express')
 const authUserController = require("../controllers/auth.controllers")
+const authMiddlware = require("../middlewares/auth.middleware")
 const authRoute = express.Router();
 // route.use()
 /**
@@ -23,4 +24,13 @@ authRoute.post("/login", authUserController.loginUserController);
  * @access Public 
  */
 authRoute.post("/logout", authUserController.logoutUserController);
+
+/**
+ * @route GET /api/auth/login
+ * @description middleware to check login user email and password  is correct or not
+ * @access private 
+ */
+authRoute.get("/log-date", authMiddlware.authUser, authUserController.getMeController);
+
+
 module.exports = authRoute;
