@@ -1,6 +1,6 @@
-import { useState, use } from "react";
+import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const EyeIcon = ({ open }) => (
@@ -46,18 +46,15 @@ export default function Login() {
 
   const navigate = useNavigate()
 
-  const { handleLogin, loading, setLoading } = useAuth();
+  const { handleLogin, loading } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     try {
       await handleLogin({ email, password });
+      navigate("/");
     } catch (err) {
       console.error("Login error:", err);
-    } finally {
-      setLoading(false);
-      navigate("/");
     }
   };
 

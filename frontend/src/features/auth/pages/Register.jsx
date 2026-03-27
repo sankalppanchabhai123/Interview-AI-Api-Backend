@@ -102,10 +102,9 @@ export default function Register() {
         try {
             await handleRegister({ username, email, password });
             setDone(true);
+            navigate("/login")
         } catch (err) {
             console.error("Register error:", err);
-        } finally {
-            navigate("/login")
         }
     };
 

@@ -30,7 +30,7 @@ export async function login({ email, password }) {
 
 export async function logout() {
     try {
-        const res = await api.get("/logout",
+        const res = await api.post("/logout", {},
             { withCredentials: true }
         );
         return res.data;

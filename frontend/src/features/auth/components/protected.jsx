@@ -1,10 +1,30 @@
-import { useAuth } from "../hooks/useAuth"
+import { useEffect, useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { Navigate } from "react-router-dom";
 
-export const UserAuth = () => {
+export const UserAuth = ({ children }) => {
+    const { user, getuser, loading } = useAuth();
+    const [checkingAuth, setCheckingAuth] = useState(true);
 
-    const { user } = useAuth();
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                await getuser();
+            } finally {
+                setCheckingAuth(false);
+            }
+        };
 
-    if (user) {
+        checkAuth();
+    }, []);
 
+    if (loading || checkingAuth) {
+        return null;
     }
-}
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
+};

@@ -97,7 +97,6 @@ async function logoutUserController(req, res) {
 
 async function getMeController(req, res) {
     const userId = req.user?._id || req.user?.id;
-
     if (!userId) {
         return res.status(401).json({
             message: "Unauthorized"
