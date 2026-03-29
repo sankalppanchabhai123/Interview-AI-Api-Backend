@@ -1,7 +1,7 @@
 const express = require("express");
 const { authUser } = require("../middlewares/auth.middleware");
 // const { interview } = require()
-const interviewController = require("../controllers/interview.controllers")
+const { tempResult: invokeGeminiAi } = require("../services/ai.services");
 
 const interviewroute = express.Router();
 
@@ -10,7 +10,7 @@ const interviewroute = express.Router();
  * @description route to get the data from the db
  * @access public  
  */
-interviewroute.get("/description", interviewController.tempResult);
+// interviewroute.get("/description", interviewController.tempResult);
 
 /**
  * @route POST /api/description/gemini

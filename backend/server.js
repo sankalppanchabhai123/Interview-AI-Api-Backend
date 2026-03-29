@@ -1,9 +1,10 @@
 const app = require("./src/app");
 const connectDb = require("./src/config/database");
-const { tempResult: invokeGeminiAi } = require("./src/controllers/interview.controllers");
+const { tempResult: generateInterviewReport } = require("./src/services/ai.services");
+const { resume, selfdescription, jobdescription } = require("./src/services/temp")
 
 connectDb();
-invokeGeminiAi();
+generateInterviewReport({ resume, selfdescription, jobdescription })
 
 app.listen(3000, () => {
     console.log("server listening on port 3000")
