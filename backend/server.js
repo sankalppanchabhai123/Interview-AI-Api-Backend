@@ -4,7 +4,7 @@ const { tempResult: generateInterviewReport } = require("./src/services/ai.servi
 const { resume, selfdescription, jobdescription } = require("./src/services/temp")
 
 connectDb();
-generateInterviewReport({ resume, selfdescription, jobdescription })
+// generateInterviewReport({ resume, selfdescription, jobdescription })
 
 app.listen(3000, () => {
     console.log("server listening on port 3000")

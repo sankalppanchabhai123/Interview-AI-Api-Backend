@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
 })
 
 app.use("/api/auth/", authRoute);
+app.use("/api/interview/", interviewroute);
 
 
 module.exports = app;
