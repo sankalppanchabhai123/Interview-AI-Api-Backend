@@ -1,6 +1,6 @@
-const mongooese = require("mongoose")
+const mongoose = require("mongoose")
 
-const mainSchema = new mongooese.Schema({
+const mainSchema = new mongoose.Schema({
     jobDescription: {
         type: String,
         required: [true, "Jobdescription is required"]
@@ -20,6 +20,10 @@ const mainSchema = new mongooese.Schema({
     behaviralQuestions: [behaviralQuestion],
     skillGaps: [skillGapSchema],
     preparationPlan: [preparationPlanSchema],
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+    }
 })
 
 const interviewQuestion = new mongooese.Schema({
