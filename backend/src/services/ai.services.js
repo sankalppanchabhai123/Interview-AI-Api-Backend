@@ -4,7 +4,7 @@ const { zodToJsonSchema } = require("zod-to-json-schema");
 
 
 const ai = new GoogleGenAI({
-    apikey: process.env.GEMINI_API_KEY
+    apikey: process.env.GEMINI_API_KEY,
 })
 
 const interviewReportSchema = z.object({
@@ -13,7 +13,7 @@ const interviewReportSchema = z.object({
         question: z.string().describe("The technical questionn can not be ask in the interview"),
         intention: z.string().describe("The intention of the interviewes behind asking this question"),
         answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc."),
-    })).describe("Technical questions that can be asked in the interview along with their intetion and how to answer tham"),
+    })).describe("Technical questions that can be asked interviewReportSchemain the interview along with their intetion and how to answer tham"),
     behavioralQuestions: z.array(z.object({
         question: z.string().describe("The technical questionn can not be ask in the interview"),
         intention: z.string().describe("The intention of the interviewes behind asking this question"),
@@ -36,16 +36,31 @@ async function generateInterviewReport({ resume, selfdescribe, jobdescribe }) {
                     Resume:${resume}
                     Self describe: ${selfdescribe}
                     Job describe: ${jobdescribe}
-    `
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseJsonSchema: zodToJsonSchema(interviewReportSchema)
-        }
-    })
-    console.log(JSON.parse(response.text))
+                    
+                    Return the response in the specified JSON schema format.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: [
+                {
+                    role: "user",
+                    parts: [{ text: prompt }]
+                }
+            ],
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: zodToJsonSchema(interviewReportSchema)
+            }
+        })
+
+        const result = response.text;
+        console.log("Generated Report:", result);
+        // return result;
+    } catch (error) {
+        console.error("Error generating interview report:", error.message);
+        throw error;
+    }
 }
 
 module.exports = {
