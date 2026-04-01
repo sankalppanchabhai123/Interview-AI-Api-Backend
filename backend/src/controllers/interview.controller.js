@@ -10,18 +10,22 @@ async function generateInterviewReportController(req, res) {
     );
 
     const resumeContent = await (new pdfParse.PDFParse(data)).getText();
-    const { selfDescription, jobdescription } = req.body
+
+    // Accept both camelCase and lowercase field names from clients.
+    const selfdescription = req.body.selfdescription ?? req.body.selfDescription;
+    const jobdescription = req.body.jobdescription ?? req.body.jobDescription;
+
     const result = await generateInterviewReport({
         resume: resumeContent.text,
-        selfDescription,
+        selfdescription,
         jobdescription,
     })
 
     const interviewReport = await interviewReportModel.create({
         user: req.user.id,
         resume: resumeContent.text,
-        selfDescription,
-        jobdescription,
+        selfDescription: selfdescription,
+        jobDescription: jobdescription,
         ...result,
     })
 

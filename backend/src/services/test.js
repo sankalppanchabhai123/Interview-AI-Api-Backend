@@ -7,7 +7,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const interviewReportSchema = z.object({
     matchScore: z.number().describe("A score between 0 and 100 indicating how well candidate's profile matches the job description"),
-    technicalQuestions: z.array(z.object({
+    interviewQuestion: z.array(z.object({
         question: z.string().describe("The technical question that can be asked in the interview"),
         intention: z.string().describe("The intention of the interviewer behind asking this question"),
         answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc."),
@@ -48,7 +48,16 @@ function extractReportPayload(payload) {
     if (!payload || typeof payload !== "object") {
         return payload;
     }
-    const directKeys = ["matchScore", "technicalQuestions", "behavioralQuestions", "skillGaps", "preparationPlan"];
+    const directKeys = [
+        "matchScore",
+        "interviewQuestion",
+        "interviewQuestions",
+        "technicalQuestions",
+        "behavioralQuestions",
+        "behaviouralQuestions",
+        "skillGaps",
+        "preparationPlan",
+    ];
     const hasDirectShape = directKeys.some((key) => Object.prototype.hasOwnProperty.call(payload, key));
     if (hasDirectShape) {
         return payload;
@@ -143,13 +152,24 @@ function normalizePreparationItem(item, index) {
 }
 
 function normalizeReportShape(payload) {
+    const technicalQuestionsSource =
+        payload?.interviewQuestion ??
+        payload?.interviewQuestions ??
+        payload?.technicalQuestions ??
+        payload?.questions;
+
+    const behavioralQuestionsSource =
+        payload?.behavioralQuestions ??
+        payload?.behaviouralQuestions ??
+        payload?.behaviorQuestions;
+
     return {
         matchScore: toNumber(payload?.matchScore, 0),
-        technicalQuestions: Array.isArray(payload?.technicalQuestions)
-            ? payload.technicalQuestions.map(normalizeQuestionItem)
+        interviewQuestion: Array.isArray(technicalQuestionsSource)
+            ? technicalQuestionsSource.map(normalizeQuestionItem)
             : [],
-        behavioralQuestions: Array.isArray(payload?.behavioralQuestions)
-            ? payload.behavioralQuestions.map(normalizeQuestionItem)
+        behavioralQuestions: Array.isArray(behavioralQuestionsSource)
+            ? behavioralQuestionsSource.map(normalizeQuestionItem)
             : [],
         skillGaps: Array.isArray(payload?.skillGaps)
             ? payload.skillGaps.map(normalizeSkillGapItem)
@@ -181,10 +201,12 @@ async function generateInterviewReport({
 
     const strictOutputInstruction = `Return ONLY valid JSON with EXACT top-level keys:
                     matchScore,
-                    technicalQuestions,
+                    interviewQuestion,
                     behavioralQuestions,
                     skillGaps,
                     preparationPlan.
+                    interviewQuestion must contain at least 5 items.
+                    behavioralQuestions must contain at least 3 items.
                     No wrapper keys, no markdown, no explanation.`;
 
     try {
@@ -214,7 +236,7 @@ async function generateInterviewReport({
             const normalizedPayload = normalizeReportShape(extractedPayload);
             const validated = interviewReportSchema.safeParse(normalizedPayload);
             if (validated.success) {
-                console.log("Generated Report:", validated.data);
+                console.log("Generated Report:\n", JSON.stringify(validated.data, null, 2));
                 return validated.data;
             }
 

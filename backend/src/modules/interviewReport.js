@@ -2,13 +2,13 @@ const mongoose = require("mongoose")
 
 
 const interviewQuestion = new mongoose.Schema({
-    interviewQuestions: {
+    question: {
         type: String,
-        required: [true, "interviewQuestions required"]
+        required: [true, "question is required"]
     },
-    intension: {
+    intention: {
         type: String,
-        required: [true, "intension required"]
+        required: [true, "intention is required"]
     },
     answer: {
         type: String,
@@ -19,13 +19,13 @@ const interviewQuestion = new mongoose.Schema({
 })
 
 const behaviralQuestion = new mongoose.Schema({
-    interviewQuestions: {
+    question: {
         type: String,
-        required: [true, "interviewQuestions required"]
+        required: [true, "question is required"]
     },
-    intension: {
+    intention: {
         type: String,
-        required: [true, "intension required"]
+        required: [true, "intention is required"]
     },
     answer: {
         type: String,
@@ -43,7 +43,7 @@ const skillGapSchema = new mongoose.Schema({
     severity: {
         type: String,
         enum: ["low", "medium", "high"],
-        requred: [true, "Severity is required"]
+        required: [true, "Severity is required"]
     }
 }, {
     _id: false,
@@ -58,8 +58,8 @@ const preparationPlanSchema = new mongoose.Schema({
         type: String,
         required: [true, "Focus is required"]
     },
-    taks: {
-        type: String,
+    tasks: {
+        type: [String],
         required: [true, "Task is required"]
     }
 })
@@ -75,13 +75,13 @@ const mainSchema = new mongoose.Schema({
     selfDescription: {
         type: String,
     },
-    matchScrore: {
+    matchScore: {
         type: Number,
         min: 0,
         max: 100,
     },
-    technicalQuestions: [interviewQuestion],
-    behaviralQuestions: [behaviralQuestion],
+    interviewQuestion: [interviewQuestion],
+    behavioralQuestions: [behaviralQuestion],
     skillGaps: [skillGapSchema],
     preparationPlan: [preparationPlanSchema],
     user: {
