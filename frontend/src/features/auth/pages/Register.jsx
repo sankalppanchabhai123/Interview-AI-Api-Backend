@@ -45,20 +45,20 @@ const requirements = [
 // ── Success screen ─────────────────────────────────────────────────────────────
 function SuccessScreen({ onBack }) {
     return (
-        <div className="min-h-screen bg-[#0b0b12] flex items-center justify-center font-sans">
+        <div className="min-h-screen bg-[#4472e5] flex items-center justify-center font-sans">
             <div className="text-center max-w-xs px-6">
-                <div className="w-18 h-18 rounded-full bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(124,58,237,0.4)] w-[72px] h-[72px]">
+                <div className="w-18 h-18 rounded-full bg-[#2f68ea] flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(24,58,156,0.4)]">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M20 6L9 17l-5-5" />
                     </svg>
                 </div>
                 <h2 className="text-white text-2xl font-bold mb-2">Account created!</h2>
-                <p className="text-white/40 text-sm leading-relaxed mb-7">
+                <p className="text-[#edf4ffcf] text-sm leading-relaxed mb-7">
                     Welcome aboard! Check your inbox to verify your email before signing in.
                 </p>
                 <button
                     onClick={"/login"}
-                    className="px-7 py-3 rounded-xl border-none bg-gradient-to-br from-violet-600 to-indigo-700 text-white text-sm font-semibold cursor-pointer"
+                    className="px-7 py-3 rounded-xl border border-black/15 bg-black text-white text-sm font-semibold cursor-pointer"
                 >
                     Go to Login
                 </button>
@@ -92,7 +92,7 @@ export default function Register() {
     const fieldBorder = (key, override) => {
         if (override) return override;
         return focused === key
-            ? "border-violet-500/70 shadow-[0_0_0_3px_rgba(139,92,246,0.18)]"
+            ? "border-[#2f68ea] shadow-[0_0_0_3px_rgba(47,104,234,0.22)]"
             : "border-white/10";
     };
 
@@ -111,20 +111,20 @@ export default function Register() {
     if (done) return <SuccessScreen onBack={() => setDone(false)} />;
 
     return (
-        <div className="min-h-screen bg-[#0b0b12] flex items-center justify-center p-6 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-[#4472e5] flex items-center justify-center p-6 font-sans relative overflow-hidden">
 
             {/* Ambient blobs */}
-            <div className="absolute -top-[15%] -right-[5%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.16)_0%,transparent_70%)] pointer-events-none" />
-            <div className="absolute -bottom-[10%] -left-[5%] w-[420px] h-[420px] rounded-full bg-[radial-gradient(circle,rgba(79,70,229,0.13)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute -top-[15%] -right-[5%] w-125 h-125 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute -bottom-[10%] -left-[5%] w-105 h-105 rounded-full bg-[radial-gradient(circle,rgba(18,35,96,0.12)_0%,transparent_70%)] pointer-events-none" />
 
-            <div className="relative w-full max-w-[440px]">
+            <div className="relative w-full max-w-110">
 
                 {/* Card */}
-                <div className="bg-white/[0.04] border border-white/10 rounded-2xl px-8 py-9">
+                <div className="rounded-2xl border border-[#cadcff73] bg-[#4472e56b] px-8 py-9 shadow-[0_18px_45px_rgba(17,42,107,0.28)] backdrop-blur-sm">
 
                     {/* Logo */}
                     <div className="flex items-center gap-2.5 mb-6">
-                        <div className="w-[38px] h-[38px] rounded-[10px] bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center shadow-[0_4px_16px_rgba(124,58,237,0.4)]">
+                        <div className="w-9.5 h-9.5 rounded-[10px] bg-[#2f68ea] flex items-center justify-center shadow-[0_4px_16px_rgba(24,58,156,0.4)]">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                                 <path d="M12 2L2 7l10 5 10-5-10-5z" fill="white" />
                                 <path d="M2 17l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -135,13 +135,13 @@ export default function Register() {
                     </div>
 
                     <h1 className="text-white text-[25px] font-bold mb-1.5 tracking-tight">Create your account</h1>
-                    <p className="text-white/40 text-sm mb-6">Join thousands of teams already using Nucleus</p>
+                    <p className="mb-6 text-sm text-[#edf4ffcf]">Join thousands of teams already using Nucleus</p>
 
                     {/* Social buttons */}
                     <div className="flex gap-2.5 mb-5">
                         {[{ icon: <GoogleIcon />, label: "Google" }, { icon: <GithubIcon />, label: "GitHub" }].map(({ icon, label }) => (
                             <button key={label} type="button"
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-xl border border-white/10 bg-white/5 text-white/80 text-[13.5px] font-medium cursor-pointer hover:bg-white/10 transition-colors"
+                                className="flex-1 cursor-pointer rounded-xl border border-[#cde0ff6b] bg-[#274dad85] px-3.5 py-2.5 text-[13.5px] font-medium text-white/90 transition-colors hover:bg-[#3161d6a6] flex items-center justify-center gap-2"
                             >
                                 {icon} {label}
                             </button>
@@ -150,22 +150,22 @@ export default function Register() {
 
                     {/* Divider */}
                     <div className="flex items-center gap-3 mb-5">
-                        <div className="flex-1 h-px bg-white/[0.08]" />
-                        <span className="text-white/30 text-[11px] font-medium tracking-widest uppercase">or sign up with email</span>
-                        <div className="flex-1 h-px bg-white/[0.08]" />
+                        <div className="flex-1 h-px bg-white/8" />
+                        <span className="text-white/70 text-[11px] font-medium tracking-widest uppercase">or sign up with email</span>
+                        <div className="flex-1 h-px bg-white/8" />
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-3.5">
 
                         {/* Username */}
                         <div>
-                            <label className="block text-white/50 text-[11px] font-semibold tracking-widest uppercase mb-1.5">Username</label>
+                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#ecf3ff]">Username</label>
                             <input
                                 type="text"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="Jane Smith"
-                                className={`w-full bg-white/[0.07] rounded-xl px-4 py-[11px] text-white text-sm outline-none border transition-all placeholder:text-white/20 autofill:shadow-[0_0_0_100px_#1a1030_inset] autofill:text-white ${fieldBorder("username")}`}
+                                className={`w-full bg-[#274dad85] rounded-xl px-4 py-2.75 text-white text-sm outline-none border transition-all placeholder:text-white/65 autofill:shadow-[0_0_0_100px_#1f3f9a_inset] autofill:text-white ${fieldBorder("username")}`}
                                 onFocus={() => setFocused("username")}
                                 onBlur={() => setFocused("")}
                             />
@@ -173,13 +173,13 @@ export default function Register() {
 
                         {/* Email */}
                         <div>
-                            <label className="block text-white/50 text-[11px] font-semibold tracking-widest uppercase mb-1.5">Email address</label>
+                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#ecf3ff]">Email address</label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
-                                className={`w-full bg-white/[0.07] rounded-xl px-4 py-[11px] text-white text-sm outline-none border transition-all placeholder:text-white/20 ${fieldBorder("email")}`}
+                                className={`w-full bg-[#274dad85] rounded-xl px-4 py-2.75 text-white text-sm outline-none border transition-all placeholder:text-white/65 ${fieldBorder("email")}`}
                                 onFocus={() => setFocused("email")}
                                 onBlur={() => setFocused("")}
                             />
@@ -187,19 +187,19 @@ export default function Register() {
 
                         {/* Password */}
                         <div>
-                            <label className="block text-white/50 text-[11px] font-semibold tracking-widest uppercase mb-1.5">Password</label>
+                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#ecf3ff]">Password</label>
                             <div className="relative">
                                 <input
                                     type={showPw ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Min. 8 characters"
-                                    className={`w-full bg-white/[0.07] rounded-xl px-4 py-[11px] pr-11 text-white text-sm outline-none border transition-all placeholder:text-white/20 ${fieldBorder("password")}`}
+                                    className={`w-full bg-[#274dad85] rounded-xl px-4 py-2.75 pr-11 text-white text-sm outline-none border transition-all placeholder:text-white/65 ${fieldBorder("password")}`}
                                     onFocus={() => setFocused("password")}
                                     onBlur={() => setFocused("")}
                                 />
                                 <button type="button" onClick={() => setShowPw(!showPw)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-white/40 cursor-pointer flex">
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-white/70 cursor-pointer flex">
                                     <Eye open={showPw} />
                                 </button>
                             </div>
@@ -209,11 +209,11 @@ export default function Register() {
                                 <div className="mt-2.5">
                                     <div className="flex gap-1 mb-1.5">
                                         {[1, 2, 3, 4].map(i => (
-                                            <div key={i} className={`flex-1 h-[3px] rounded-full transition-all ${i <= strength ? strengthBar[strength] : "bg-white/10"}`} />
+                                            <div key={i} className={`flex-1 h-0.75 rounded-full transition-all ${i <= strength ? strengthBar[strength] : "bg-white/10"}`} />
                                         ))}
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-white/35 text-[11px]">Password strength</span>
+                                        <span className="text-white/70 text-[11px]">Password strength</span>
                                         <span className={`text-[11px] font-semibold ${strengthColor[strength]}`}>{strengthLabel[strength]}</span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2.5">
@@ -221,10 +221,10 @@ export default function Register() {
                                             const pass = test(password);
                                             return (
                                                 <div key={label} className="flex items-center gap-1.5">
-                                                    <div className={`w-3.5 h-3.5 rounded-full flex-shrink-0 flex items-center justify-center transition-all border ${pass ? "bg-green-500 border-green-500" : "bg-white/[0.08] border-white/15"}`}>
+                                                    <div className={`w-3.5 h-3.5 rounded-full shrink-0 flex items-center justify-center transition-all border ${pass ? "bg-green-500 border-green-500" : "bg-white/8 border-white/15"}`}>
                                                         {pass && <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l1.8 1.8 3.2-3.6" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                                                     </div>
-                                                    <span className={`text-[11px] ${pass ? "text-white/60" : "text-white/30"}`}>{label}</span>
+                                                    <span className={`text-[11px] ${pass ? "text-white/85" : "text-white/55"}`}>{label}</span>
                                                 </div>
                                             );
                                         })}
@@ -235,14 +235,14 @@ export default function Register() {
 
                         {/* Confirm password */}
                         <div>
-                            <label className="block text-white/50 text-[11px] font-semibold tracking-widest uppercase mb-1.5">Confirm password</label>
+                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#ecf3ff]">Confirm password</label>
                             <div className="relative">
                                 <input
                                     type={showCf ? "text" : "password"}
                                     value={confirm}
                                     onChange={(e) => setConfirm(e.target.value)}
                                     placeholder="Repeat your password"
-                                    className={`w-full bg-white/[0.07] rounded-xl px-4 py-[11px] pr-11 text-white text-sm outline-none border transition-all placeholder:text-white/20 ${mismatch ? "border-red-500/60 shadow-[0_0_0_3px_rgba(239,68,68,0.12)]"
+                                    className={`w-full bg-[#274dad85] rounded-xl px-4 py-2.75 pr-11 text-white text-sm outline-none border transition-all placeholder:text-white/65 ${mismatch ? "border-red-500/60 shadow-[0_0_0_3px_rgba(239,68,68,0.12)]"
                                         : match ? "border-green-500/60 shadow-[0_0_0_3px_rgba(34,197,94,0.12)]"
                                             : fieldBorder("confirm")
                                         }`}
@@ -250,7 +250,7 @@ export default function Register() {
                                     onBlur={() => setFocused("")}
                                 />
                                 <button type="button" onClick={() => setShowCf(!showCf)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-white/40 cursor-pointer flex">
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-white/70 cursor-pointer flex">
                                     <Eye open={showCf} />
                                 </button>
                                 {match && (
@@ -263,19 +263,19 @@ export default function Register() {
                         </div>
 
                         {/* Terms */}
-                        <div className="flex items-start gap-2.5 !mt-5">
+                        <div className="flex items-start gap-2.5 mt-5!">
                             <div
                                 onClick={() => setAgreed(!agreed)}
-                                className={`w-[18px] h-[18px] rounded-[5px] flex-shrink-0 mt-0.5 border-[1.5px] flex items-center justify-center cursor-pointer transition-all ${agreed ? "border-violet-600 bg-violet-600 shadow-[0_0_10px_rgba(124,58,237,0.4)]" : "border-white/20 bg-white/5"
+                                className={`w-4.5 h-4.5 rounded-[5px] shrink-0 mt-0.5 border-[1.5px] flex items-center justify-center cursor-pointer transition-all ${agreed ? "border-[#2f68ea] bg-[#2f68ea] shadow-[0_0_10px_rgba(47,104,234,0.45)]" : "border-white/20 bg-white/5"
                                     }`}
                             >
                                 {agreed && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5.5l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                             </div>
-                            <span className="text-white/40 text-[13px] leading-relaxed">
+                            <span className="text-[#e8f0ff] text-[13px] leading-relaxed">
                                 I agree to the{" "}
-                                <a href="#" className="text-violet-400 no-underline font-medium hover:text-violet-300">Terms of Service</a>
+                                <a href="#" className="text-white no-underline font-medium hover:text-[#dce9ff]">Terms of Service</a>
                                 {" "}and{" "}
-                                <a href="#" className="text-violet-400 no-underline font-medium hover:text-violet-300">Privacy Policy</a>
+                                <a href="#" className="text-white no-underline font-medium hover:text-[#dce9ff]">Privacy Policy</a>
                             </span>
                         </div>
 
@@ -283,9 +283,9 @@ export default function Register() {
                         <button
                             type="submit"
                             disabled={loading || !agreed}
-                            className={`w-full py-3.5 px-5 rounded-xl border-none text-sm font-semibold flex items-center justify-center gap-2 transition-all !mt-5 ${agreed
-                                ? "bg-gradient-to-br from-violet-600 to-indigo-700 text-white cursor-pointer shadow-[0_4px_20px_rgba(124,58,237,0.35)] hover:brightness-110"
-                                : "bg-white/[0.07] text-white/30 cursor-not-allowed"
+                            className={`w-full py-3.5 px-5 rounded-xl border border-black/15 text-sm font-semibold flex items-center justify-center gap-2 transition-all mt-5! ${agreed
+                                ? "bg-black text-white cursor-pointer shadow-[0_4px_20px_rgba(7,12,26,0.45)] hover:brightness-110"
+                                : "bg-[#274dad85] text-white/45 cursor-not-allowed"
                                 }`}
                         >
                             {loading ? (
@@ -305,16 +305,16 @@ export default function Register() {
                         </button>
                     </form>
 
-                    <p className="text-center text-white/35 text-[13px] mt-5">
+                    <p className="mt-5 text-center text-[13px] text-[#e8f0ffc7]">
                         Already have an account?{" "}
-                        <a href="/login" className="text-violet-400 no-underline font-medium hover:text-violet-300">Sign in</a>
+                        <a href="/login" className="text-white no-underline font-medium hover:text-[#dce9ff]">Sign in</a>
                     </p>
                 </div>
 
                 {/* Trust badges */}
                 <div className="flex items-center justify-center gap-4 mt-4">
                     {["SOC 2 Certified", "256-bit SSL", "GDPR Ready"].map(badge => (
-                        <span key={badge} className="text-white/20 text-[11px] flex items-center gap-1">
+                        <span key={badge} className="text-[#d9e8ff80] text-[11px] flex items-center gap-1">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                             </svg>
