@@ -5,9 +5,31 @@ const cors = require("cors");
 const interviewroute = require("./routes/interview.routes");
 const app = express();
 
+const normalizeOrigin = (value) => (value || "").trim().replace(/\/$/, "");
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://interview-ai-api-nu.vercel.app",
+    ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(",") : []),
+]
+    .map(normalizeOrigin)
+    .filter(Boolean);
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: (origin, callback) => {
+        // Allow server-to-server requests and same-origin requests with no Origin header.
+        if (!origin) {
+            return callback(null, true);
+        }
+
+        const requestOrigin = normalizeOrigin(origin);
+        if (allowedOrigins.includes(requestOrigin)) {
+            return callback(null, requestOrigin);
+        }
+
+        return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true
 }))
 
@@ -22,16 +44,6 @@ app.get('/', (req, res) => {
 
 app.use("/api/auth/", authRoute);
 app.use("/api/interview/", interviewroute);
-
-app.use((err, req, res, next) => {
-    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-        return res.status(400).json({
-            message: "Invalid JSON payload"
-        });
-    }
-
-    return next(err);
-});
 
 
 module.exports = app;
