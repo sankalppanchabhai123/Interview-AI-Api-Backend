@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/hooks/useAuth";
-import { generateInterviewReport } from "../services/interview.api";
+import { generateInterviewReport, getMyInterviewReports } from "../services/interview.api";
 import InterviewReport from "./Result";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024;
@@ -23,26 +23,49 @@ const reportHighlights = [
 const normalizeReportData = (report) => {
     const technicalQuestions = Array.isArray(report?.interviewQuestion)
         ? report.interviewQuestion
-            .map((item) => (typeof item === "string" ? item : item?.question))
-            .filter(Boolean)
+            .map((item) => {
+                if (typeof item === "string") {
+                    return { question: item, intention: "", answer: "" };
+                }
+
+                return {
+                    question: item?.question ?? "",
+                    intention: item?.intention ?? "",
+                    answer: item?.answer ?? "",
+                };
+            })
+            .filter((item) => item.question)
         : [];
 
     const behavioralQuestions = Array.isArray(report?.behavioralQuestions)
         ? report.behavioralQuestions
-            .map((item) => (typeof item === "string" ? item : item?.question))
-            .filter(Boolean)
+            .map((item) => {
+                if (typeof item === "string") {
+                    return { question: item, intention: "", answer: "" };
+                }
+
+                return {
+                    question: item?.question ?? "",
+                    intention: item?.intention ?? "",
+                    answer: item?.answer ?? "",
+                };
+            })
+            .filter((item) => item.question)
         : [];
 
     const skillGaps = Array.isArray(report?.skillGaps)
         ? report.skillGaps
             .map((item) => {
                 if (typeof item === "string") {
-                    return item;
+                    return { skill: item, severity: "medium" };
                 }
                 if (!item?.skill) {
                     return null;
                 }
-                return item?.severity ? `${item.skill} (${item.severity})` : item.skill;
+                return {
+                    skill: item.skill,
+                    severity: item?.severity || "medium",
+                };
             })
             .filter(Boolean)
         : [];
@@ -73,11 +96,39 @@ const normalizeReportData = (report) => {
     };
 };
 
+const formatReportDate = (value) => {
+    if (!value) {
+        return "Recently saved";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return "Recently saved";
+    }
+
+    return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+};
+
+const getReportTitle = (report) => {
+    const jobDescription = report?.jobDescription?.trim();
+
+    if (!jobDescription) {
+        return "Untitled report";
+    }
+
+    return jobDescription.length > 72 ? `${jobDescription.slice(0, 72).trim()}...` : jobDescription;
+};
+
 const ReportForm = () => {
     const fileRef = useRef(null);
     const formRef = useRef(null);
     const navigate = useNavigate();
     const { handleLogout } = useAuth();
+    const reportPreviewRef = useRef(null);
 
     const [jobDesc, setJobDesc] = useState("");
     const [selfDesc, setSelfDesc] = useState("");
@@ -87,9 +138,49 @@ const ReportForm = () => {
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState("");
     const [reportData, setReportData] = useState(null);
+    const [historyReports, setHistoryReports] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyError, setHistoryError] = useState("");
+    const [activeReportId, setActiveReportId] = useState(null);
 
     const filledCount = [jobDesc.trim(), selfDesc.trim(), Boolean(resume)].filter(Boolean).length;
     const canSubmit = filledCount === 3 && !loading;
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadReports = async () => {
+            setHistoryLoading(true);
+            setHistoryError("");
+
+            try {
+                const response = await getMyInterviewReports();
+                if (!isMounted) {
+                    return;
+                }
+
+                setHistoryReports(Array.isArray(response?.reports) ? response.reports : []);
+            } catch (err) {
+                if (!isMounted) {
+                    return;
+                }
+
+                setHistoryError(err?.response?.data?.message || "Unable to load previous reports.");
+            } finally {
+                if (isMounted) {
+                    setHistoryLoading(false);
+                }
+            }
+        };
+
+        loadReports();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const visibleHistoryReports = useMemo(() => historyReports.slice(0, 6), [historyReports]);
 
     const handleFile = (file) => {
         if (!file) {
@@ -143,9 +234,18 @@ const ReportForm = () => {
                 resume,
             });
 
-            const reportData = normalizeReportData(response?.interviewReport ?? {});
+            const savedReport = response?.interviewReport ?? {};
+            const reportData = normalizeReportData(savedReport);
             setSubmitted(true);
             setReportData(reportData);
+            setActiveReportId(savedReport?._id ?? null);
+            setHistoryReports((prev) => {
+                const nextReports = [savedReport, ...prev.filter((item) => item?._id !== savedReport?._id)];
+                return nextReports.filter(Boolean);
+            });
+            window.requestAnimationFrame(() => {
+                reportPreviewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
         } catch (err) {
             const message = err?.response?.data?.message || "Unable to generate report. Please try again.";
             setError(message);
@@ -157,9 +257,21 @@ const ReportForm = () => {
     const handleGenerateNewReport = () => {
         setReportData(null);
         setSubmitted(false);
+        setActiveReportId(null);
         window.requestAnimationFrame(() => {
             formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
         });
+    };
+
+    const openSavedReport = (report) => {
+        if (!report) {
+            return;
+        }
+
+        setReportData(normalizeReportData(report));
+        setSubmitted(true);
+        setError("");
+        setActiveReportId(report?._id ?? null);
     };
 
     return (
@@ -203,9 +315,9 @@ const ReportForm = () => {
                     </p>
                 </section>
 
-                <section ref={formRef} className="mt-8 sm:mt-10 mx-auto w-[min(760px,100%)] rounded-[28px] border border-[rgba(255,255,255,0.34)] bg-[rgba(68,114,229,0.42)] shadow-[0_16px_35px_rgba(17,42,107,0.2),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-[6px] p-[clamp(16px,3vw,30px)] animate-fade-up-delay-1">
+                <section ref={formRef} className="mt-8 sm:mt-10 mx-auto w-[min(760px,100%)] rounded-[28px] border border-[rgba(255,255,255,0.34)] bg-[rgba(208,225,255,0.2)] backdrop-blur-sm shadow-[0_16px_35px_rgba(17,42,107,0.2),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-[6px] p-[clamp(16px,3vw,30px)] animate-fade-up-delay-1">
                     <h2 className="m-0 text-[#f6f9ff] text-[clamp(20px,2.1vw,28px)] font-bold animate-fade-up">
-                        <span className="font-black text-black">Interview Input Form</span>
+                        <span className="font-black text-[#071230]">Interview Input Form</span>
                     </h2>
                     <p className="mt-2 mb-0 text-[rgba(245,241,241,0.92)] text-[clamp(12px,1.4vw,16px)] animate-fade-up-delay-1">
                         Complete all inputs carefully. Better context produces better interview suggestions.
@@ -213,7 +325,7 @@ const ReportForm = () => {
 
                     <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
                         <div className="animate-fade-up-delay-1">
-                            <label className="block mb-1.5 text-[16px] font-semibold text-[#000000]">
+                            <label className="block mb-1.5 text-[16px] font-semibold text-[#0e192e]">
                                 Job Description
                             </label>
                             <textarea
@@ -226,7 +338,7 @@ const ReportForm = () => {
                         </div>
 
                         <div className="animate-fade-up-delay-2">
-                            <label className="block mb-1.5 text-[16px] font-semibold text-[#000000]">
+                            <label className="block mb-1.5 text-[16px] font-semibold text-[#0e192e]">
                                 Resume / CV
                             </label>
                             {resume ? (
@@ -273,7 +385,7 @@ const ReportForm = () => {
                         </div>
 
                         <div className="animate-fade-up-delay-3">
-                            <label className="block mb-1.5 text-[16px] font-semibold text-[#000000]">
+                            <label className="block mb-1.5 text-[16px] font-semibold text-[#0e192e]">
                                 Self Description
                             </label>
                             <textarea
@@ -314,13 +426,13 @@ const ReportForm = () => {
                 </section>
 
                 {reportData ? (
-                    <section className="mt-8 sm:mt-10 rounded-[28px] border border-[rgba(255,255,255,0.24)] bg-[rgba(255,255,255,0.12)] backdrop-blur-sm p-[clamp(16px,3vw,30px)] shadow-[0_18px_40px_rgba(17,42,107,0.2)] animate-fade-up">
+                    <section ref={reportPreviewRef} className="mt-8 sm:mt-10 rounded-[28px] border border-[rgba(205,224,255,0.4)] bg-[rgba(208,225,255,0.22)] backdrop-blur-sm p-[clamp(16px,3vw,30px)] shadow-[0_18px_40px_rgba(17,42,107,0.18)] animate-fade-up">
                         <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
                             <div>
                                 <h2 className="m-0 text-[clamp(22px,2.6vw,34px)] font-bold text-[#f6f9ff] leading-tight">
                                     Your Generated Report
                                 </h2>
-                                <p className="mt-2 mb-0 text-[clamp(13px,1.3vw,16px)] text-[#0f172a] leading-relaxed">
+                                <p className="mt-2 mb-0 text-[clamp(13px,1.3vw,16px)] text-[#dbe7ff] leading-relaxed">
                                     The report appears right below the form so you can review and edit the details without leaving the page.
                                 </p>
                             </div>
@@ -328,9 +440,9 @@ const ReportForm = () => {
                             <button
                                 type="button"
                                 onClick={handleGenerateNewReport}
-                                className="border-none rounded-full bg-[#0f172a] text-white px-4 py-2 text-sm font-semibold shadow-[0_10px_25px_rgba(15,23,42,0.28)] hover:opacity-90"
+                                className="border-none rounded-full bg-[#2f68ea] text-white px-4 py-2 text-sm font-semibold shadow-[0_10px_25px_rgba(15,23,42,0.24)] hover:opacity-90"
                             >
-                                Generate New Report Details
+                                Back to Form
                             </button>
                         </div>
 
@@ -340,12 +452,107 @@ const ReportForm = () => {
                     </section>
                 ) : null}
 
-                <section className="mt-8 sm:mt-10 rounded-[26px] border border-[rgba(255,255,255,0.24)] bg-[rgba(255,255,255,0.12)] backdrop-blur-sm p-[clamp(16px,2.8vw,28px)] shadow-[0_16px_35px_rgba(17,42,107,0.18)] animate-fade-up-delay-3">
+                <section className="mt-8 sm:mt-10 mx-auto w-[min(1100px,100%)] rounded-[28px] border border-[#5a86e8] bg-[#5a86e8] shadow-[0_14px_28px_rgba(17,42,107,0.18)] p-[clamp(16px,2.6vw,26px)]">
+                    <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
+                        <div>
+                            <h2 className="m-0 text-[clamp(20px,2vw,28px)] font-bold text-[#0f255c]">
+                                Previous Reports
+                            </h2>
+                            <p className="mt-2 mb-0 text-[13px] sm:text-[15px] text-[#dbe7ff] leading-relaxed">
+                                Open any saved report for the current account. The latest six reports are shown here.
+                            </p>
+                        </div>
+                        <div className="rounded-full border border-[rgba(205,224,255,0.38)] bg-[rgba(47,104,234,0.18)] px-3 py-1 text-[11px] font-bold tracking-[0.14em] uppercase text-white">
+                            {visibleHistoryReports.length} saved
+                        </div>
+                    </div>
+
+                    {historyError ? (
+                        <div className="mb-4 rounded-2xl border border-[rgba(205,224,255,0.4)] bg-[rgba(47,104,234,0.14)] px-4 py-3 text-sm text-[#e8f0ff]">
+                            {historyError}
+                        </div>
+                    ) : null}
+
+                    {historyLoading ? (
+                        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 items-stretch">
+                            {[1, 2, 3].map((item) => (
+                                <div
+                                    key={item}
+                                    className="h-36 rounded-[20px] border border-[rgba(255,255,255,0.22)] bg-[rgba(255,255,255,0.1)] animate-pulse"
+                                />
+                            ))}
+                        </div>
+                    ) : visibleHistoryReports.length > 0 ? (
+                        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 items-stretch">
+                            {visibleHistoryReports.map((report) => {
+                                const isActive = activeReportId === report?._id;
+                                const technicalCount = Array.isArray(report?.interviewQuestion) ? report.interviewQuestion.length : 0;
+                                const behavioralCount = Array.isArray(report?.behavioralQuestions) ? report.behavioralQuestions.length : 0;
+                                const skillCount = Array.isArray(report?.skillGaps) ? report.skillGaps.length : 0;
+
+                                return (
+                                    <button
+                                        key={report?._id}
+                                        type="button"
+                                        onClick={() => openSavedReport(report)}
+                                        className={`group flex h-full flex-col text-left rounded-[20px] border p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(17,42,107,0.22)] ${isActive
+                                            ? "border-[rgba(255,255,255,0.42)] bg-[rgba(47,104,234,0.26)] shadow-[0_14px_28px_rgba(255,255,255,0.12)]"
+                                            : "border-[rgba(205,224,255,0.28)] bg-[rgba(47,104,234,0.16)]"
+                                            }`}
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <p className="m-0 text-[12px] font-bold tracking-[0.16em] uppercase text-[#dbe7ff]">
+                                                    {formatReportDate(report?.createdAt)}
+                                                </p>
+                                                <h3 className="mt-2 mb-0 text-[18px] font-bold text-[#f6f9ff] leading-snug group-hover:text-white">
+                                                    {getReportTitle(report)}
+                                                </h3>
+                                            </div>
+                                            <div className="rounded-full border border-[rgba(205,224,255,0.34)] bg-[rgba(255,255,255,0.14)] px-3 py-1 text-[11px] font-bold text-white shadow-[0_6px_14px_rgba(8,18,48,0.12)]">
+                                                {Number(report?.matchScore) || 0}%
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 grid grid-cols-3 gap-2 items-stretch">
+                                            <div className="min-h-18 rounded-[14px] border border-[rgba(205,224,255,0.32)] bg-[rgba(255,255,255,0.14)] px-3 py-2 flex flex-col items-start justify-between text-left">
+                                                <div className="text-[10px] font-bold tracking-[0.14em] uppercase text-[#e8f0ff]">Tech</div>
+                                                <div className="mt-1 text-sm font-semibold text-white">{technicalCount}</div>
+                                            </div>
+                                            <div className="min-h-18 rounded-[14px] border border-[rgba(205,224,255,0.32)] bg-[rgba(255,255,255,0.14)] px-3 py-2 flex flex-col items-start justify-between text-left">
+                                                <div className="text-[10px] font-bold tracking-[0.14em] uppercase text-[#e8f0ff]">Behavior</div>
+                                                <div className="mt-1 text-sm font-semibold text-white">{behavioralCount}</div>
+                                            </div>
+                                            <div className="min-h-18 rounded-[14px] border border-[rgba(205,224,255,0.32)] bg-[rgba(255,255,255,0.14)] px-3 py-2 flex flex-col items-start justify-between text-left">
+                                                <div className="text-[10px] font-bold tracking-[0.14em] uppercase text-[#e8f0ff]">Gaps</div>
+                                                <div className="mt-1 text-sm font-semibold text-white">{skillCount}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-auto flex items-center justify-between gap-3 pt-2 text-sm text-[#dbe7ff]">
+                                            <span>{isActive ? "Currently open" : "Click to open report"}</span>
+                                            <span className="transition-transform duration-300 group-hover:translate-x-1">View</span>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="rounded-[20px] border border-[rgba(205,224,255,0.3)] bg-[rgba(47,104,234,0.16)] p-5 text-left text-[#e8f0ff]">
+                            <h3 className="m-0 text-[18px] font-bold text-white">No previous reports yet</h3>
+                            <p className="mt-2 mb-0 text-[14px] leading-relaxed text-[#dbe7ff]">
+                                Once you generate a report, it will appear here for quick access later.
+                            </p>
+                        </div>
+                    )}
+                </section>
+
+                <section className="mt-8 sm:mt-10 rounded-[26px] border border-[rgba(205,224,255,0.36)] bg-[rgba(208,225,255,0.2)] backdrop-blur-sm p-[clamp(16px,2.8vw,28px)] shadow-[0_16px_35px_rgba(17,42,107,0.18)] animate-fade-up-delay-3">
                     <div className="text-center max-w-3xl mx-auto">
                         <h2 className="m-0 text-[clamp(22px,2.6vw,34px)] font-bold text-[#f6f9ff]">
-                            What You Will Get In Your <span className="text-black">Report</span>
+                            What You Will Get In Your <span className="text-[#0f172a]">Report</span>
                         </h2>
-                        <p className="mt-2 mb-0 text-[clamp(13px,1.3vw,16px)] text-[#0f172a] leading-relaxed">
+                        <p className="mt-2 mb-0 text-[clamp(13px,1.3vw,16px)] text-[#dbe7ff] leading-relaxed">
                             Once you submit the form, InterviewAI analyzes your inputs and generates a focused report you can use immediately.
                         </p>
                     </div>
@@ -354,13 +561,13 @@ const ReportForm = () => {
                         {reportHighlights.map((item) => (
                             <article
                                 key={item.title}
-                                className="rounded-[18px] border border-[rgba(255,255,255,0.26)] bg-[rgba(255,255,255,0.14)] p-4.5 text-left hover-lift"
+                                className="rounded-[18px] border border-[rgba(205,224,255,0.34)] bg-[rgba(255,255,255,0.14)] p-4.5 text-left hover-lift"
                             >
                                 <div className="w-7 h-7 rounded-full bg-[#dce6fb] shadow-[inset_0_0_0_1px_rgba(26,42,73,0.14)] flex items-center justify-center">
                                     <span className="w-2 h-2 rounded-full bg-[#2f68ea]" />
                                 </div>
-                                <h3 className="mt-3 mb-2 text-[17px] font-bold text-white leading-snug">{item.title}</h3>
-                                <p className="m-0 text-[14px] leading-6 text-[#0f172a]">{item.description}</p>
+                                <h3 className="mt-3 mb-2 text-[17px] font-bold text-[#0e192e] leading-snug">{item.title}</h3>
+                                <p className="m-0 text-[14px] leading-6 text-[#dbe7ff]">{item.description}</p>
                             </article>
                         ))}
                     </div>

@@ -64,7 +64,7 @@ export default function Home() {
         try {
             await handleLogout();
         } finally {
-            navigate("/login", { replace: true });
+            navigate("/", { replace: true });
         }
     };
 
@@ -192,7 +192,7 @@ export default function Home() {
                         {workflowCards.map((card, index) => (
                             <article
                                 key={card.title}
-                                className={`rounded-[22px] border border-[rgba(255,255,255,0.22)] bg-[rgba(255,255,255,0.16)] backdrop-blur-sm p-5 text-left hover-lift ${workflowAnimationClasses[index]}`}
+                                className={`rounded-[22px] border border-[rgba(255,255,255,0.22)] bg-[rgba(255,255,255,0.16)] backdrop-blur-sm p-5 text-left hover-zoom `}
                             >
                                 <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-[#dbe7ff]">
                                     Step {index + 1}

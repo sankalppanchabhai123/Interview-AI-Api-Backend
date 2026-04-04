@@ -10,43 +10,56 @@ const blacklistToken = require("../modules/tokenblocklist")
  * @access Public 
  */
 async function registerUserController(req, res) {
-    const { username, email, password } = req.body || {};
-    if (!username || !email || !password) {
-        return res.status(400).json({
-            "massage": "please provide username, email and password"
+    try {
+        const { username, email, password } = req.body || {};
+        const normalizedUsername = (username || "").trim();
+        const normalizedEmail = (email || "").trim().toLowerCase();
+
+        if (!normalizedUsername || !normalizedEmail || !password) {
+            return res.status(400).json({
+                message: "Please provide username, email and password"
+            })
+        }
+
+        const isUserAlreadyExists = await userModel.findOne({
+            $or: [{ username: normalizedUsername }, { email: normalizedEmail }]
         })
-    }
+        if (isUserAlreadyExists) {
+            return res.status(400).json({ message: "Username or email already taken" })
+        }
 
-    const isUserAlreadyExists = await userModel.findOne({
-        $or: [{ username }, { email }]
-    })
-    if (isUserAlreadyExists) {
-        return res.status(400).json({ "massage": "username/email already taken" })
-    }
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+        const User = await userModel.create({
+            username: normalizedUsername,
+            email: normalizedEmail,
+            password: hashedPassword
+        })
 
-    const User = await userModel.create({
-        username,
-        email,
-        password: hashedPassword
-    })
-
-    const token = await jwt.sign({
-        id: User._id,
-        username: User.username,
-    }, process.env.JWT_SECRET, { expiresIn: '1d' });
-
-    res.cookie("token", token);
-
-    res.status(201).json({
-        message: "User registered successfully",
-        user: {
+        const token = await jwt.sign({
             id: User._id,
             username: User.username,
-            email: User.email,
+        }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+        res.cookie("token", token);
+
+        res.status(201).json({
+            message: "User registered successfully",
+            user: {
+                id: User._id,
+                username: User.username,
+                email: User.email,
+            }
+        })
+    } catch (error) {
+        if (error?.code === 11000) {
+            return res.status(400).json({ message: "Username or email already taken" })
         }
-    })
+
+        return res.status(500).json({
+            message: "Failed to register user"
+        })
+    }
 }
 
 async function loginUserController(req, res) {

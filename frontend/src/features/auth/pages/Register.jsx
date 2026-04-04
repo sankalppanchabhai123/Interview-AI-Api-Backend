@@ -43,6 +43,7 @@ export default function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [formError, setFormError] = useState("");
 
     const [showPw, setShowPw] = useState(false);
     const [focused, setFocused] = useState("");
@@ -62,12 +63,25 @@ export default function Register() {
     // ── Submit ───────────────────────────────────────────────────────────────
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setFormError("");
+
+        if (!username.trim() || !email.trim() || !password) {
+            setFormError("Please fill username, email and password.");
+            return;
+        }
+
         try {
-            await handleRegister({ username, email, password });
+            await handleRegister({
+                username: username.trim(),
+                email: email.trim().toLowerCase(),
+                password,
+            });
             setDone(true);
             navigate("/login")
         } catch (err) {
             console.error("Register error:", err);
+            const apiError = err?.response?.data?.message || err?.response?.data?.massage;
+            setFormError(apiError || "Could not register. Please try again.");
         }
     };
 
@@ -83,7 +97,7 @@ export default function Register() {
             <div className="relative w-full max-w-110">
 
                 {/* Card */}
-                <div className="rounded-2xl border border-[#d8e6ff] bg-[#f8fbff] px-8 py-7 shadow-[0_18px_45px_rgba(17,42,107,0.28)] backdrop-blur-sm">
+                <div className="rounded-2xl   bg-[rgba(255,255,255,0.16)] px-8 py-7 shadow-[0_18px_45px_rgba(17,42,107,0.28)] backdrop-blur-sm">
 
                     {/* Logo */}
                     <div className="flex items-center gap-2.5 mb-6">
@@ -103,7 +117,7 @@ export default function Register() {
 
                         {/* Username */}
                         <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#355289]">Username</label>
+                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#0c1b36]">Username</label>
                             <input
                                 type="text"
                                 value={username}
@@ -117,7 +131,7 @@ export default function Register() {
 
                         {/* Email */}
                         <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#355289]">Email address</label>
+                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#0c1b36]">Email address</label>
                             <input
                                 type="email"
                                 value={email}
@@ -131,7 +145,7 @@ export default function Register() {
 
                         {/* Password */}
                         <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#355289]">Password</label>
+                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#0c1b36]">Password</label>
                             <div className="relative">
                                 <input
                                     type={showPw ? "text" : "password"}
@@ -170,11 +184,17 @@ export default function Register() {
                                 </>
                             )}
                         </button>
+
+                        {formError ? (
+                            <p className="text-[12px] text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                {formError}
+                            </p>
+                        ) : null}
                     </form>
 
-                    <p className="mt-5 text-center text-[13px] text-[#45639c]">
+                    <p className="mt-5 text-center text-[13px] text-[#0c1b36]">
                         Already have an account?{" "}
-                        <a href="/login" className="text-[#061025] no-underline font-medium hover:text-[#163c8d]">Sign in</a>
+                        <a href="/login" className="text-[#000000] no-underline font-medium hover:text-[#163c8d]">Sign in</a>
                     </p>
                 </div>
             </div>

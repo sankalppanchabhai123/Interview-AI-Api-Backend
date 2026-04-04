@@ -58,7 +58,7 @@ export default function Login() {
             <div className="relative w-full max-w-105">
 
                 {/* Card */}
-                <div className="rounded-2xl border border-[#d8e6ff] bg-[#f8fbff] backdrop-blur-sm px-8 py-7 shadow-[0_18px_45px_rgba(17,42,107,0.28)]">
+                <div className="rounded-2xl  bg-[rgba(255,255,255,0.16)] backdrop-blur-sm px-8 py-7 shadow-[0_18px_45px_rgba(17,42,107,0.28)]">
 
                     {/* Logo */}
                     <div className="flex items-center gap-2.5 mb-7">
@@ -80,7 +80,7 @@ export default function Login() {
 
                         {/* Email */}
                         <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#355289]">
+                            <label className="mb-1.5 block text-[11px] font-bold tracking-widest uppercase text-[#0c1b36]">
                                 Email
                             </label>
                             <input
@@ -96,7 +96,7 @@ export default function Login() {
 
                         {/* Password */}
                         <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold tracking-widest uppercase text-[#355289]">
+                            <label className="mb-1.5 block text-[11px] font-bold tracking-widest uppercase text-[#0c1b36]">
                                 Password
                             </label>
                             <div className="relative">
@@ -112,7 +112,7 @@ export default function Login() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[#4f69a1] cursor-pointer flex items-center p-0.5 hover:text-[#1d469f] transition-colors"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[#0c1b36] cursor-pointer flex items-center p-0.5 hover:text-[#1d469f] transition-colors"
                                 >
                                     <EyeIcon open={showPassword} />
                                 </button>
@@ -123,7 +123,7 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full py-3.5 px-5 rounded-xl bg-[#1d469f] text-white text-sm font-semibold cursor-pointer shadow-lg flex items-center justify-center gap-2 transition-all hover:bg-[#163c8d] ${loading ? "opacity-80" : "opacity-100"}`}
+                            className={`w-full py-3.5 px-5 rounded-xl bg-[#0b2c75] text-white text-sm font-semibold cursor-pointer shadow-lg flex items-center justify-center gap-2 transition-all hover:bg-[#163c8d] ${loading ? "opacity-80" : "opacity-100"}`}
                         >
                             {loading ? (
                                 <>
@@ -144,11 +144,11 @@ export default function Login() {
                         </button>
                     </form>
 
-                    <p className="mt-4 mb-0 text-center text-[13px] text-[#355289]">
+                    <p className="mt-4 mb-0 text-center text-[13px] font-bold text-[#0c1b36]">
                         New here?{" "}
                         <Link
                             to="/register"
-                            className="font-semibold text-[#1d469f] underline underline-offset-3 hover:text-[#163c8d]"
+                            className="font-semibold text-[#000000] underline underline-offset-3 hover:text-[#f0f1f3]"
                         >
                             Create new one
                         </Link>

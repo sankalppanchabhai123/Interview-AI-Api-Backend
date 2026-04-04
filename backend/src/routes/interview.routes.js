@@ -1,7 +1,7 @@
 const express = require("express");
 const { authUser } = require("../middlewares/auth.middleware");
 // const { interview } = require()
-const { generateInterviewReportController } = require("../controllers/interview.controller")
+const { generateInterviewReportController, getMyInterviewReportsController, getInterviewReportByIdController } = require("../controllers/interview.controller")
 const upload = require("../middlewares/file.middleware")
 
 const interviewroute = express.Router();
@@ -12,6 +12,8 @@ const interviewroute = express.Router();
  * @access public  
  */
 interviewroute.post("/", authUser, upload.single('resume'), generateInterviewReportController);
+interviewroute.get("/mine", authUser, getMyInterviewReportsController);
+interviewroute.get("/mine/:reportId", authUser, getInterviewReportByIdController);
 
 /**
  * @route POST /api/description/gemini

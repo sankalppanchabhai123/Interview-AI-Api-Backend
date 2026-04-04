@@ -88,6 +88,8 @@ const mainSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "users",
     }
+}, {
+    timestamps: true,
 })
 const interviewReportModel = mongoose.model("interviewReport", mainSchema);
 
