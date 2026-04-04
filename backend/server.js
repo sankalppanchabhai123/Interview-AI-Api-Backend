@@ -15,7 +15,7 @@ async function bootstrap() {
     console.log("Interview report generated from server.js inputs");
     // console.log("Match Score:", report.matchScore);
 
-    app.listen(3000, () => {
+    app.listen(3000,'0.0.0.0', () => {
         console.log("server listening on port 3000");
     });
 }
